@@ -1,4 +1,5 @@
 import type { StacksNetworkName } from "./stacks-config";
+import { getStacksContractPrincipal } from "./stacks-config";
 import { fetchGuessTheHashBet, fetchGuessTheHashConfig } from "./stacks-readonly";
 import {
   fetchAddressTransactions,
@@ -42,6 +43,14 @@ const CACHE_TTL_MS = 20_000;
 
 function cacheKey(address: string, networkName: StacksNetworkName) {
   return `${networkName}:${address}`;
+}
+
+function requireContractPrincipal(): string {
+  const principal = getStacksContractPrincipal();
+  if (!principal) {
+    throw new Error("Contract principal is missing.");
+  }
+  return principal;
 }
 
 function parseUintFromRepr(repr?: string): bigint | null {
@@ -109,9 +118,8 @@ export async function fetchBetReceiptsForAddress(
   }
 
   const txs = await fetchAddressTransactions(address, networkName);
-  const calls = filterGuessTheHashCalls(txs, "");
-  const contractCalls = calls.filter((tx) => tx.contract_call?.contract_id);
-  const grouped = contractCalls.sort(sortByNewest);
+  const contractId = requireContractPrincipal();
+  const grouped = filterGuessTheHashCalls(txs, contractId).sort(sortByNewest);
   const placeCalls = grouped.filter(
     (tx) => tx.contract_call?.function_name === "place-bet",
   );
