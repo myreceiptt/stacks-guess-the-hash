@@ -504,7 +504,11 @@ export default function GuessTheHashWalletClient() {
                     const betId = BigInt(resolveBetIdInput.trim());
                     resolveBet(betId);
                   } catch {
-                    setResolveError("Bet ID must be a valid integer.");
+                    setResolveNotice({
+                      variant: "error",
+                      title: "Invalid bet ID.",
+                      description: "Bet ID must be a valid integer.",
+                    });
                   }
                 }}
                 className="rounded-md border border-zinc-700 px-4 py-2 text-sm text-zinc-200 hover:border-zinc-500 hover:text-white">
