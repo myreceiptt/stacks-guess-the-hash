@@ -20,6 +20,7 @@ import {
 } from "@/lib/stacks-readonly";
 import { getStacksNetwork } from "@/lib/stacks-network";
 import { getHumanReadableError, getKnownErrorByKey } from "@/lib/stacks-errors";
+import { getOpenContractCall } from "@/lib/stacks-connect";
 import {
   bitmapToDigits,
   getExplorerAddressUrl,
@@ -155,7 +156,7 @@ export default function GuessTheHashWalletClient() {
     setResolveTxId(null);
     setResolveStatus("submitting");
     try {
-      const { openContractCall } = await import("@stacks/connect");
+      const openContractCall = await getOpenContractCall();
       openContractCall({
         contractAddress,
         contractName,
