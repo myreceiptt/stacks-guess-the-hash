@@ -1,6 +1,5 @@
 "use client";
 import { useCallback, useState } from "react";
-import { showConnect } from "@stacks/connect";
 import type { UserData } from "@stacks/auth";
 import {
   getStacksAddressFromUserData,
@@ -8,6 +7,8 @@ import {
 } from "@/lib/stacks-config";
 import { getStacksNetwork } from "@/lib/stacks-network";
 import { stacksUserSession } from "@/lib/stacks-session";
+import { getShowConnect } from "@/lib/stacks-connect";
+import { getHumanReadableError } from "@/lib/stacks-errors";
 
 export type StacksWalletState = {
   status: "disconnected" | "connecting" | "connected";
@@ -49,6 +50,14 @@ export function useStacksWallet() {
 
   const connect = useCallback(() => {
     setState((prev) => ({ ...prev, status: "connecting", error: null }));
+    if (typeof window === "undefined") {
+      setState((prev) => ({
+        ...prev,
+        status: "disconnected",
+        error: "Wallet connect is only available in the browser.",
+      }));
+      return;
+    }
     const connectOptions = {
       appDetails: {
         name: "Guess The Hash",
@@ -66,7 +75,18 @@ export function useStacksWallet() {
         }));
       },
     };
-    (showConnect as unknown as (options: any) => void)(connectOptions);
+    getShowConnect()
+      .then((showConnectFn) => {
+        showConnectFn(connectOptions);
+      })
+      .catch((error) => {
+        const message = getHumanReadableError(error);
+        setState((prev) => ({
+          ...prev,
+          status: "disconnected",
+          error: `${message.title} ${message.detail}`,
+        }));
+      });
   }, [refresh]);
 
   const disconnect = useCallback(() => {
