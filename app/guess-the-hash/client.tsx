@@ -140,6 +140,22 @@ export default function GuessTheHashClient() {
         </h2>
         <StacksWalletPanel />
       </section>
+
+      <section className="space-y-2 rounded-lg border border-zinc-800/60 bg-zinc-900/20 p-4">
+        <h2 className="text-lg font-semibold text-zinc-100">Actions</h2>
+        <div className="flex flex-col gap-2 text-sm">
+          <Link
+            className="underline text-zinc-200 hover:text-white"
+            href="/guess-the-hash/place-bet">
+            Place Bet
+          </Link>
+          <Link
+            className="underline text-zinc-200 hover:text-white"
+            href="/guess-the-hash/wallet">
+            My Wallet
+          </Link>
+        </div>
+      </section>
     </main>
   );
 }
