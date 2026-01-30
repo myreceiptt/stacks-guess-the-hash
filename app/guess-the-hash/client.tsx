@@ -97,7 +97,11 @@ export default function GuessTheHashClient() {
 
         <div className="rounded-lg border border-zinc-800/80 bg-black/30 px-4 py-4">
           {configStatus === "loading" ? (
-            <p className="text-sm text-zinc-400">Loading config...</p>
+            <div className="space-y-2">
+              <div className="h-4 w-1/2 animate-pulse rounded bg-zinc-800/60" />
+              <div className="h-4 w-2/3 animate-pulse rounded bg-zinc-800/60" />
+              <div className="h-4 w-1/3 animate-pulse rounded bg-zinc-800/60" />
+            </div>
           ) : null}
           {configStatus === "error" ? (
             <p className="text-sm text-red-300">
