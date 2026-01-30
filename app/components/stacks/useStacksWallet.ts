@@ -1,5 +1,5 @@
 "use client";
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import type { UserData } from "@stacks/auth";
 import {
   getStacksAddressFromUserData,
@@ -8,13 +8,17 @@ import {
 import { getStacksNetwork } from "@/lib/stacks-network";
 import { stacksUserSession } from "@/lib/stacks-session";
 import { getShowConnect } from "@/lib/stacks-connect";
-import { getHumanReadableError } from "@/lib/stacks-errors";
+import {
+  getHumanReadableConnectError,
+  getKnownErrorByKey,
+} from "@/lib/stacks-errors";
 
 export type StacksWalletState = {
   status: "disconnected" | "connecting" | "connected";
   address: string | null;
   userData: UserData | null;
   error: string | null;
+  errorDetail: string | null;
   networkName: "testnet" | "mainnet";
 };
 
@@ -27,6 +31,7 @@ export function useStacksWallet() {
         address: null,
         userData: null,
         error: null,
+        errorDetail: null,
         networkName,
       };
     }
@@ -36,6 +41,7 @@ export function useStacksWallet() {
       address: getStacksAddressFromUserData(userData, networkName),
       userData,
       error: null,
+      errorDetail: null,
       networkName,
     };
   }, [networkName]);
@@ -48,30 +54,88 @@ export function useStacksWallet() {
     setState(getSessionState());
   }, [getSessionState]);
 
+  useEffect(() => {
+    if (typeof window === "undefined") {
+      return;
+    }
+    if (stacksUserSession.isSignInPending()) {
+      setState((prev) => ({
+        ...prev,
+        status: "connecting",
+        error: null,
+        errorDetail: null,
+      }));
+      stacksUserSession
+        .handlePendingSignIn()
+        .then(() => {
+          refresh();
+        })
+        .catch((error) => {
+          const message = getHumanReadableConnectError(error);
+          setState((prev) => ({
+            ...prev,
+            status: "disconnected",
+            error: `${message.title} ${message.detail}`,
+            errorDetail:
+              error instanceof Error ? error.message : String(error),
+          }));
+        });
+    }
+  }, [refresh]);
+
   const connect = useCallback(() => {
-    setState((prev) => ({ ...prev, status: "connecting", error: null }));
+    setState((prev) => ({
+      ...prev,
+      status: "connecting",
+      error: null,
+      errorDetail: null,
+    }));
     if (typeof window === "undefined") {
       setState((prev) => ({
         ...prev,
         status: "disconnected",
         error: "Wallet connect is only available in the browser.",
+        errorDetail: null,
       }));
       return;
     }
     const connectOptions = {
       appDetails: {
         name: "Guess The Hash",
-        icon: "/icon.png",
+        icon: "/icon.svg",
       },
       userSession: stacksUserSession as unknown as any,
       network: getStacksNetwork(),
+      manifestPath: "/manifest.json",
+      authOptions: {
+        appDetails: {
+          name: "Guess The Hash",
+          icon: "/icon.svg",
+        },
+        userSession: stacksUserSession as unknown as any,
+        onFinish: () => {
+          refresh();
+        },
+        onCancel: () => {
+          const message = getKnownErrorByKey("connectCancelled");
+          setState((prev) => ({
+            ...prev,
+            status: "disconnected",
+            error: `${message.title} ${message.detail}`,
+            errorDetail: null,
+          }));
+        },
+      },
       onFinish: () => {
         refresh();
       },
       onCancel: () => {
+        const message = getKnownErrorByKey("connectCancelled");
         setState((prev) => ({
           ...prev,
           status: "disconnected",
+          error: `${message.title} ${message.detail}`,
+          errorDetail: null,
         }));
       },
     };
@@ -80,11 +144,12 @@ export function useStacksWallet() {
         showConnectFn(connectOptions);
       })
       .catch((error) => {
-        const message = getHumanReadableError(error);
+        const message = getHumanReadableConnectError(error);
         setState((prev) => ({
           ...prev,
           status: "disconnected",
           error: `${message.title} ${message.detail}`,
+          errorDetail: error instanceof Error ? error.message : String(error),
         }));
       });
   }, [refresh]);
@@ -96,6 +161,7 @@ export function useStacksWallet() {
       address: null,
       userData: null,
       error: null,
+      errorDetail: null,
       networkName,
     });
   }, [networkName]);
