@@ -1,0 +1,34 @@
+---
+id: 2
+name: Testnet sanity (place + early resolve)
+network: testnet
+stacks-node: "https://api.testnet.hiro.so"
+bitcoin-node: "http://blockstack:blockstacksystem@bitcoind.testnet.stacks.co:18332"
+plan:
+  batches:
+    - id: 0
+      transactions:
+        - stx-transfer:
+            expected-sender: ST29ECHHQ6F9344SGGGRGDPTPFPTXA3GHXGMKMRG1
+            recipient: ST29ECHHQ6F9344SGGGRGDPTPFPTXA3GHXGMKMRG1.guess-the-hash
+            mstx-amount: 5000
+            cost: 2000
+            anchor-block-only: true
+        - contract-call:
+            contract-id: ST29ECHHQ6F9344SGGGRGDPTPFPTXA3GHXGMKMRG1.guess-the-hash
+            expected-sender: ST29ECHHQ6F9344SGGGRGDPTPFPTXA3GHXGMKMRG1
+            method: place-bet
+            parameters:
+              - "(list u1 u2)"
+              - u1000
+            cost: 10000
+            anchor-block-only: true
+        - contract-call:
+            contract-id: ST29ECHHQ6F9344SGGGRGDPTPFPTXA3GHXGMKMRG1.guess-the-hash
+            expected-sender: ST29ECHHQ6F9344SGGGRGDPTPFPTXA3GHXGMKMRG1
+            method: resolve
+            parameters:
+              - u1
+            cost: 10000
+            anchor-block-only: true
+      epoch: "3.3"

@@ -10,3 +10,6 @@ coverage
 *.info
 costs-reports.json
 node_modules
+
+.secrets/
+.env.local
