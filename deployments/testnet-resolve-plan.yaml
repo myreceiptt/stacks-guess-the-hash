@@ -1,0 +1,19 @@
+---
+id: 3
+name: Testnet resolve after target
+network: testnet
+stacks-node: "https://api.testnet.hiro.so"
+bitcoin-node: "http://blockstack:blockstacksystem@bitcoind.testnet.stacks.co:18332"
+plan:
+  batches:
+    - id: 0
+      transactions:
+        - contract-call:
+            contract-id: ST29ECHHQ6F9344SGGGRGDPTPFPTXA3GHXGMKMRG1.guess-the-hash
+            expected-sender: ST29ECHHQ6F9344SGGGRGDPTPFPTXA3GHXGMKMRG1
+            method: resolve
+            parameters:
+              - u1
+            cost: 10000
+            anchor-block-only: true
+      epoch: "3.3"

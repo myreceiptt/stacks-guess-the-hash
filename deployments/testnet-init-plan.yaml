@@ -1,0 +1,35 @@
+---
+id: 1
+name: Testnet init (guess-the-hash)
+network: testnet
+stacks-node: "https://api.testnet.hiro.so"
+bitcoin-node: "http://blockstack:blockstacksystem@bitcoind.testnet.stacks.co:18332"
+plan:
+  batches:
+    - id: 0
+      transactions:
+        - contract-call:
+            contract-id: ST29ECHHQ6F9344SGGGRGDPTPFPTXA3GHXGMKMRG1.guess-the-hash
+            method: set-fee-bps
+            parameters:
+              - u100
+            expected-sender: ST29ECHHQ6F9344SGGGRGDPTPFPTXA3GHXGMKMRG1
+            cost: 10000
+            anchor-block-only: true
+        - contract-call:
+            contract-id: ST29ECHHQ6F9344SGGGRGDPTPFPTXA3GHXGMKMRG1.guess-the-hash
+            method: set-fee-treasury
+            parameters:
+              - "'ST29ECHHQ6F9344SGGGRGDPTPFPTXA3GHXGMKMRG1"
+            expected-sender: ST29ECHHQ6F9344SGGGRGDPTPFPTXA3GHXGMKMRG1
+            cost: 10000
+            anchor-block-only: true
+        - contract-call:
+            contract-id: ST29ECHHQ6F9344SGGGRGDPTPFPTXA3GHXGMKMRG1.guess-the-hash
+            method: set-resolver-tip-ustx
+            parameters:
+              - u1000
+            expected-sender: ST29ECHHQ6F9344SGGGRGDPTPFPTXA3GHXGMKMRG1
+            cost: 10000
+            anchor-block-only: true
+      epoch: "3.3"
