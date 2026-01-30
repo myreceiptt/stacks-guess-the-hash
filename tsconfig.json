@@ -5,12 +5,17 @@
     "module": "ESNext",
     "lib": ["ESNext"],
     "skipLibCheck": true,
+    "jsx": "preserve",
 
     "moduleResolution": "bundler",
     "allowImportingTsExtensions": true,
     "resolveJsonModule": true,
     "isolatedModules": true,
     "noEmit": true,
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["./*"]
+    },
 
     "strict": true,
     "noImplicitAny": true,
@@ -20,6 +25,9 @@
   },
   "include": [
     "node_modules/@stacks/clarinet-sdk/vitest-helpers/src",
-    "tests"
+    "tests",
+    "app",
+    "lib",
+    "next-env.d.ts"
   ]
 }
