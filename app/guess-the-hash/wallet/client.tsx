@@ -164,7 +164,7 @@ export default function GuessTheHashWalletClient() {
         functionArgs: [uintCV(betId)],
         network: getStacksNetwork(),
         stxAddress: address,
-        onFinish: async (data) => {
+        onFinish: async (data: { txId: string }) => {
           setResolveTxId(data.txId);
           setResolveStatus("broadcasted");
           setResolveNotice({
