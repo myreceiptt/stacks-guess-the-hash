@@ -3,7 +3,18 @@ import { useMemo } from "react";
 import { useStacksWallet } from "./useStacksWallet";
 
 export default function StacksWalletPanel() {
-  const { status, address, error, errorDetail, networkName, connect, disconnect } =
+  const {
+    status,
+    address,
+    error,
+    errorDetail,
+    lastResponseKeys,
+    lastResultKeys,
+    lastStack,
+    networkName,
+    connect,
+    disconnect,
+  } =
     useStacksWallet();
 
   const networkWarning = useMemo(() => {
@@ -51,6 +62,13 @@ export default function StacksWalletPanel() {
               <details className="text-xs text-zinc-400">
                 <summary className="cursor-pointer">Details</summary>
                 <p className="mt-1">{errorDetail}</p>
+                {lastResponseKeys ? (
+                  <p className="mt-1">response keys: {lastResponseKeys.join(", ")}</p>
+                ) : null}
+                {lastResultKeys ? (
+                  <p className="mt-1">result keys: {lastResultKeys.join(", ")}</p>
+                ) : null}
+                {lastStack ? <pre className="mt-2 whitespace-pre-wrap">{lastStack}</pre> : null}
                 <p className="mt-1">Tip: Check pop-up blocking and Leather testnet settings.</p>
               </details>
             ) : null}
