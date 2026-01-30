@@ -81,7 +81,14 @@ export default function MyStats({ address, networkName }: MyStatsProps) {
       </div>
 
       {status === "loading" && !stats ? (
-        <p className="mt-4 text-sm text-zinc-300">Loading wallet stats…</p>
+        <div className="mt-4 grid gap-3 sm:grid-cols-2">
+          {[...Array(6)].map((_, index) => (
+            <div
+              key={`skeleton-${index}`}
+              className="h-16 rounded-md border border-zinc-800/70 bg-zinc-900/60 animate-pulse"
+            />
+          ))}
+        </div>
       ) : null}
 
       {status === "error" ? (
