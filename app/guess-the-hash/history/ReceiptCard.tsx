@@ -12,6 +12,7 @@ import type { BetReceipt } from "@/lib/stacks-history";
 import Notice from "@/app/components/ui/Notice";
 import StatusBadge from "@/app/components/ui/StatusBadge";
 import { getHumanReadableError, getKnownErrorByKey } from "@/lib/stacks-errors";
+import { getOpenContractCall } from "@/lib/stacks-connect";
 
 type ReceiptCardProps = {
   receipt: BetReceipt;
@@ -131,7 +132,7 @@ export default function ReceiptCard({
     setResolveNotice(null);
     setResolveStatus("submitting");
     try {
-      const { openContractCall } = await import("@stacks/connect");
+      const openContractCall = await getOpenContractCall();
       openContractCall({
         contractAddress,
         contractName,
