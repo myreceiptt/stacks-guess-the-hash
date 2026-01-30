@@ -240,6 +240,13 @@ export default function PlaceBetClient() {
           Switch to Testnet.
         </div>
       ) : null}
+      {!contractAddress || !contractName ? (
+        <Notice
+          variant="error"
+          title="Missing contract config."
+          description="Set NEXT_PUBLIC_CONTRACT_ADDRESS and NEXT_PUBLIC_CONTRACT_NAME in .env.local and restart dev server."
+        />
+      ) : null}
 
       <section className="space-y-4 rounded-lg border border-zinc-800/60 bg-zinc-900/20 p-4">
         <h2 className="text-lg font-semibold text-zinc-100">Wallet</h2>
