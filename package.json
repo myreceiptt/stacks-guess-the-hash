@@ -1,7 +1,7 @@
 {
   "name": "stacks-guess-the-hash",
-  "version": "1.0.0",
-  "description": "Guess The Hash — Stacks (Clarinet) contracts + tests.",
+  "version": "0.1.0",
+  "description": "Guess The Hash — Stacks testnet app.",
   "type": "module",
   "private": true,
   "scripts": {
