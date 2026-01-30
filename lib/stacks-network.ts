@@ -1,10 +1,10 @@
-import { StacksMainnet, StacksTestnet } from "@stacks/network";
+import { STACKS_MAINNET, STACKS_TESTNET, createNetwork } from "@stacks/network";
 import { getStacksNetworkName } from "./stacks-config";
 
 export function getStacksNetwork() {
   const networkName = getStacksNetworkName();
   if (networkName === "mainnet") {
-    return new StacksMainnet();
+    return createNetwork(STACKS_MAINNET);
   }
-  return new StacksTestnet();
+  return createNetwork(STACKS_TESTNET);
 }

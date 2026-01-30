@@ -1,8 +1,4 @@
-import {
-  callReadOnlyFunction,
-  cvToJSON,
-  uintCV,
-} from "@stacks/transactions";
+import { cvToJSON, fetchCallReadOnlyFunction, uintCV } from "@stacks/transactions";
 import {
   getStacksContractAddress,
   getStacksContractName,
@@ -80,7 +76,7 @@ export async function fetchGuessTheHashConfig(
   senderAddress: string,
 ): Promise<GuessTheHashConfig> {
   const { address, name } = requireContractConfig();
-  const response = await callReadOnlyFunction({
+  const response = await fetchCallReadOnlyFunction({
     contractAddress: address,
     contractName: name,
     functionName: "get-config",
@@ -103,7 +99,7 @@ export async function fetchGuessTheHashBet(
   senderAddress: string,
 ): Promise<GuessTheHashBet | null> {
   const { address, name } = requireContractConfig();
-  const response = await callReadOnlyFunction({
+  const response = await fetchCallReadOnlyFunction({
     contractAddress: address,
     contractName: name,
     functionName: "get-bet",

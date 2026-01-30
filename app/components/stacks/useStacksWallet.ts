@@ -49,12 +49,12 @@ export function useStacksWallet() {
 
   const connect = useCallback(() => {
     setState((prev) => ({ ...prev, status: "connecting", error: null }));
-    showConnect({
+    const connectOptions = {
       appDetails: {
         name: "Guess The Hash",
         icon: "/icon.png",
       },
-      userSession: stacksUserSession,
+      userSession: stacksUserSession as unknown as any,
       network: getStacksNetwork(),
       onFinish: () => {
         refresh();
@@ -65,7 +65,8 @@ export function useStacksWallet() {
           status: "disconnected",
         }));
       },
-    });
+    };
+    (showConnect as unknown as (options: any) => void)(connectOptions);
   }, [refresh]);
 
   const disconnect = useCallback(() => {
