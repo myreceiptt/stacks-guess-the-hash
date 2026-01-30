@@ -3,6 +3,8 @@ import { useCallback, useEffect, useState } from "react";
 import StacksWalletPanel from "@/app/components/stacks/StacksWalletPanel";
 import { useStacksWallet } from "@/app/components/stacks/useStacksWallet";
 import { useStacksTipHeight } from "@/app/components/stacks/useStacksTipHeight";
+import HowItWorksPanel from "@/app/components/ui/HowItWorksPanel";
+import Notice from "@/app/components/ui/Notice";
 import {
   clearBetReceiptCache,
   fetchBetReceiptsForAddress,
@@ -63,6 +65,7 @@ export default function GuessTheHashHistoryClient() {
       </header>
 
       <StacksWalletPanel />
+      <HowItWorksPanel />
 
       {address ? (
         <section className="space-y-4">
@@ -115,9 +118,11 @@ export default function GuessTheHashHistoryClient() {
           </div>
         </section>
       ) : (
-        <div className="rounded-lg border border-zinc-800/70 bg-zinc-900/30 p-6 text-sm text-zinc-300">
-          Connect your wallet to view bet receipts.
-        </div>
+        <Notice
+          variant="info"
+          title="Connect your wallet"
+          description="Connect your wallet to view bet receipts."
+        />
       )}
     </main>
   );

@@ -4,6 +4,8 @@ import Link from "next/link";
 import { listCV, uintCV } from "@stacks/transactions";
 import StacksWalletPanel from "../../components/stacks/StacksWalletPanel";
 import { useStacksWallet } from "../../components/stacks/useStacksWallet";
+import Notice from "@/app/components/ui/Notice";
+import HowItWorksPanel from "@/app/components/ui/HowItWorksPanel";
 import {
   getStacksContractAddress,
   getStacksContractName,
@@ -13,6 +15,7 @@ import {
 } from "@/lib/stacks-config";
 import { fetchGuessTheHashConfig } from "@/lib/stacks-readonly";
 import { getStacksNetwork } from "@/lib/stacks-network";
+import { getHumanReadableError, getKnownErrorByKey } from "@/lib/stacks-errors";
 import {
   formatUstxToStx,
   getExplorerAddressUrl,
@@ -37,7 +40,11 @@ export default function PlaceBetClient() {
   const [txStatus, setTxStatus] = useState<"idle" | "submitting" | "error">(
     "idle",
   );
-  const [txError, setTxError] = useState<string | null>(null);
+  const [txNotice, setTxNotice] = useState<{
+    variant: "success" | "error" | "info";
+    title: string;
+    description?: string;
+  } | null>(null);
 
   const contractAddress = getStacksContractAddress();
   const contractName = getStacksContractName();
@@ -133,26 +140,43 @@ export default function PlaceBetClient() {
   const netUstx = useMemo(() => totalStakeUstx - feeUstx, [totalStakeUstx, feeUstx]);
 
   const handleSubmit = async () => {
-    setTxError(null);
+    setTxNotice(null);
     setTxId(null);
     if (!address) {
-      setTxError("Connect a wallet first.");
+      setTxNotice({
+        variant: "info",
+        title: "Connect your wallet.",
+        description: "Connect your wallet to place a bet.",
+      });
       return;
     }
     if (!contractAddress || !contractName) {
-      setTxError("Contract configuration is missing.");
+      setTxNotice({
+        variant: "error",
+        title: "Configuration missing.",
+        description: "Contract configuration is missing.",
+      });
       return;
     }
     if (networkName !== "testnet") {
-      setTxError("Switch to testnet before submitting.");
+      const message = getKnownErrorByKey("networkMismatch");
+      setTxNotice({ variant: "error", title: message.title, description: message.detail });
       return;
     }
     if (selectedCount < 1) {
-      setTxError("Select at least one digit.");
+      setTxNotice({
+        variant: "error",
+        title: "Select digits.",
+        description: "Select at least one digit.",
+      });
       return;
     }
     if (stakeError || !stakePerCharUstx) {
-      setTxError(stakeError ?? "Invalid stake amount.");
+      setTxNotice({
+        variant: "error",
+        title: "Invalid stake.",
+        description: stakeError ?? "Invalid stake amount.",
+      });
       return;
     }
     setTxStatus("submitting");
@@ -171,14 +195,22 @@ export default function PlaceBetClient() {
         onFinish: (data) => {
           setTxId(data.txId);
           setTxStatus("idle");
+          setTxNotice({
+            variant: "success",
+            title: "Bet submitted.",
+            description: "Transaction broadcasted successfully.",
+          });
         },
         onCancel: () => {
           setTxStatus("idle");
+          const message = getKnownErrorByKey("cancelled");
+          setTxNotice({ variant: "error", title: message.title, description: message.detail });
         },
       });
     } catch (error) {
       setTxStatus("error");
-      setTxError(error instanceof Error ? error.message : String(error));
+      const message = getHumanReadableError(error);
+      setTxNotice({ variant: "error", title: message.title, description: message.detail });
     }
   };
 
@@ -211,7 +243,16 @@ export default function PlaceBetClient() {
       <section className="space-y-4 rounded-lg border border-zinc-800/60 bg-zinc-900/20 p-4">
         <h2 className="text-lg font-semibold text-zinc-100">Wallet</h2>
         <StacksWalletPanel />
+        {!address ? (
+          <Notice
+            variant="info"
+            title="Connect your wallet"
+            description="Connect a wallet to place a bet on testnet."
+          />
+        ) : null}
       </section>
+
+      <HowItWorksPanel />
 
       <section className="space-y-4 rounded-lg border border-zinc-800/60 bg-zinc-900/20 p-4">
         <h2 className="text-lg font-semibold text-zinc-100">Choose Digits</h2>
@@ -291,6 +332,14 @@ export default function PlaceBetClient() {
           ) : null}
         </div>
 
+        {feeBps === null && !feeError ? (
+          <div className="space-y-2">
+            <div className="h-4 w-1/2 animate-pulse rounded bg-zinc-800/60" />
+            <div className="h-4 w-2/3 animate-pulse rounded bg-zinc-800/60" />
+            <div className="h-4 w-3/4 animate-pulse rounded bg-zinc-800/60" />
+          </div>
+        ) : null}
+
         <div className="grid gap-2 text-sm text-zinc-300">
           <p>
             Selected count:{" "}
@@ -341,7 +390,15 @@ export default function PlaceBetClient() {
           className="rounded-md border border-zinc-700 px-4 py-2 text-sm text-zinc-200 disabled:opacity-50 disabled:cursor-not-allowed hover:border-zinc-500 hover:text-white">
           {txStatus === "submitting" ? "Submitting..." : "Place Bet"}
         </button>
-        {txError ? <p className="text-xs text-red-300">{txError}</p> : null}
+        {txNotice ? (
+          <Notice
+            variant={txNotice.variant}
+            title={txNotice.title}
+            description={txNotice.description}
+            actionLabel={txId ? "View transaction" : undefined}
+            actionHref={txId ? getExplorerTxUrl(txId, networkName) : undefined}
+          />
+        ) : null}
         {txId ? (
           <p className="text-xs text-zinc-400">
             Submitted:{" "}

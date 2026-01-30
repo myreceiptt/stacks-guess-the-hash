@@ -9,6 +9,9 @@ import {
 } from "@/lib/stacks-config";
 import { getExplorerTxUrl, formatUstxToStx, toHexDigit } from "@/lib/stacks-utils";
 import type { BetReceipt } from "@/lib/stacks-history";
+import Notice from "@/app/components/ui/Notice";
+import StatusBadge from "@/app/components/ui/StatusBadge";
+import { getHumanReadableError, getKnownErrorByKey } from "@/lib/stacks-errors";
 
 type ReceiptCardProps = {
   receipt: BetReceipt;
@@ -74,7 +77,11 @@ export default function ReceiptCard({
   const [resolveStatus, setResolveStatus] = useState<
     "idle" | "submitting" | "broadcasted" | "error"
   >("idle");
-  const [resolveError, setResolveError] = useState<string | null>(null);
+  const [resolveNotice, setResolveNotice] = useState<{
+    variant: "success" | "error" | "info";
+    title: string;
+    description?: string;
+  } | null>(null);
   const [resolveTxId, setResolveTxId] = useState<string | null>(null);
 
   const contractAddress = getStacksContractAddress();
@@ -112,7 +119,16 @@ export default function ReceiptCard({
     if (receipt.betId === null || !contractAddress || !contractName) {
       return;
     }
-    setResolveError(null);
+    if (networkName !== "testnet") {
+      const message = getKnownErrorByKey("networkMismatch");
+      setResolveNotice({
+        variant: "error",
+        title: message.title,
+        description: message.detail,
+      });
+      return;
+    }
+    setResolveNotice(null);
     setResolveStatus("submitting");
     try {
       const { openContractCall } = await import("@stacks/connect");
@@ -125,15 +141,31 @@ export default function ReceiptCard({
         onFinish: async (data) => {
           setResolveTxId(data.txId);
           setResolveStatus("broadcasted");
+          setResolveNotice({
+            variant: "success",
+            title: "Resolve submitted.",
+            description: "Transaction broadcasted successfully.",
+          });
           onRefresh();
         },
         onCancel: () => {
           setResolveStatus("idle");
+          const message = getKnownErrorByKey("cancelled");
+          setResolveNotice({
+            variant: "error",
+            title: message.title,
+            description: message.detail,
+          });
         },
       });
     } catch (error) {
       setResolveStatus("error");
-      setResolveError(error instanceof Error ? error.message : String(error));
+      const message = getHumanReadableError(error);
+      setResolveNotice({
+        variant: "error",
+        title: message.title,
+        description: message.detail,
+      });
     }
   };
 
@@ -145,7 +177,7 @@ export default function ReceiptCard({
             Bet {receipt.betId !== null ? `#${receipt.betId.toString()}` : "Unknown ID"}
           </h3>
           <p className="text-xs text-zinc-500">
-            Network: {networkName} • Status: {readiness}
+            Network: {networkName}
           </p>
         </div>
         <div className="flex flex-col items-end text-xs text-zinc-400">
@@ -153,6 +185,10 @@ export default function ReceiptCard({
           <span>Target height: {formatHeight(receipt.targetHeight)}</span>
         </div>
       </div>
+      <StatusBadge
+        variant={readiness === "Resolved" ? "resolved" : readiness === "Ready" ? "ready" : "pending"}
+        label={readiness}
+      />
 
       <div className="grid gap-3 sm:grid-cols-2">
         <div className="space-y-1 text-xs text-zinc-400">
@@ -229,19 +265,14 @@ export default function ReceiptCard({
             {canResolve ? "Resolve now" : "Waiting for target block"}
           </button>
         )}
-        {resolveStatus === "broadcasted" && resolveTxId ? (
-          <a
-            className="text-xs text-zinc-300 underline hover:text-white"
-            href={getExplorerTxUrl(resolveTxId, networkName)}
-            target="_blank"
-            rel="noreferrer">
-            View resolve tx
-          </a>
-        ) : null}
-        {resolveStatus === "error" ? (
-          <span className="text-xs text-red-300">
-            {resolveError ?? "Resolve failed."}
-          </span>
+        {resolveNotice ? (
+          <Notice
+            variant={resolveNotice.variant}
+            title={resolveNotice.title}
+            description={resolveNotice.description}
+            actionLabel={resolveTxId ? "View resolve tx" : undefined}
+            actionHref={resolveTxId ? getExplorerTxUrl(resolveTxId, networkName) : undefined}
+          />
         ) : null}
       </div>
     </div>
