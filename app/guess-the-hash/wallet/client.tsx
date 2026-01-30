@@ -4,6 +4,8 @@ import Link from "next/link";
 import StacksWalletPanel from "../../components/stacks/StacksWalletPanel";
 import { useStacksWallet } from "../../components/stacks/useStacksWallet";
 import { useStacksTipHeight } from "../../components/stacks/useStacksTipHeight";
+import Notice from "@/app/components/ui/Notice";
+import StatusBadge from "@/app/components/ui/StatusBadge";
 import {
   getStacksContractAddress,
   getStacksContractName,
@@ -17,6 +19,7 @@ import {
   fetchGuessTheHashConfig,
 } from "@/lib/stacks-readonly";
 import { getStacksNetwork } from "@/lib/stacks-network";
+import { getHumanReadableError, getKnownErrorByKey } from "@/lib/stacks-errors";
 import {
   bitmapToDigits,
   getExplorerAddressUrl,
@@ -40,7 +43,11 @@ export default function GuessTheHashWalletClient() {
   const [resolveStatus, setResolveStatus] = useState<
     "idle" | "submitting" | "broadcasted" | "confirmed" | "error"
   >("idle");
-  const [resolveError, setResolveError] = useState<string | null>(null);
+  const [resolveNotice, setResolveNotice] = useState<{
+    variant: "success" | "error" | "info";
+    title: string;
+    description?: string;
+  } | null>(null);
   const [resolveTxId, setResolveTxId] = useState<string | null>(null);
   const [resolveBetIdInput, setResolveBetIdInput] = useState("");
 
@@ -128,14 +135,23 @@ export default function GuessTheHashWalletClient() {
 
   const resolveBet = async (betId: bigint) => {
     if (!address || !contractAddress || !contractName) {
-      setResolveError("Connect a wallet and configure contract first.");
+      setResolveNotice({
+        variant: "info",
+        title: "Connect a wallet.",
+        description: "Connect a wallet and configure contract first.",
+      });
       return;
     }
     if (networkName !== "testnet") {
-      setResolveError("Switch to testnet before resolving.");
+      const message = getKnownErrorByKey("networkMismatch");
+      setResolveNotice({
+        variant: "error",
+        title: message.title,
+        description: message.detail,
+      });
       return;
     }
-    setResolveError(null);
+    setResolveNotice(null);
     setResolveTxId(null);
     setResolveStatus("submitting");
     try {
@@ -150,6 +166,11 @@ export default function GuessTheHashWalletClient() {
         onFinish: async (data) => {
           setResolveTxId(data.txId);
           setResolveStatus("broadcasted");
+          setResolveNotice({
+            variant: "success",
+            title: "Resolve submitted.",
+            description: "Transaction broadcasted successfully.",
+          });
           const updated = await loadBet(betId);
           if (updated?.resolved) {
             setResolveStatus("confirmed");
@@ -157,11 +178,22 @@ export default function GuessTheHashWalletClient() {
         },
         onCancel: () => {
           setResolveStatus("idle");
+          const message = getKnownErrorByKey("cancelled");
+          setResolveNotice({
+            variant: "error",
+            title: message.title,
+            description: message.detail,
+          });
         },
       });
     } catch (error) {
       setResolveStatus("error");
-      setResolveError(error instanceof Error ? error.message : String(error));
+      const message = getHumanReadableError(error);
+      setResolveNotice({
+        variant: "error",
+        title: message.title,
+        description: message.detail,
+      });
     }
   };
 
@@ -197,6 +229,19 @@ export default function GuessTheHashWalletClient() {
     currentHeight !== null &&
     currentHeight >= Number(bet.targetHeight);
 
+  const statusVariant = useMemo(() => {
+    if (!bet) {
+      return "pending";
+    }
+    if (bet.resolved) {
+      return "resolved";
+    }
+    if (currentHeight !== null && currentHeight >= Number(bet.targetHeight)) {
+      return "ready";
+    }
+    return "pending";
+  }, [bet, currentHeight]);
+
   return (
     <main className="mx-auto max-w-3xl px-6 py-12 space-y-10">
       <header className="space-y-2">
@@ -212,9 +257,11 @@ export default function GuessTheHashWalletClient() {
         </h2>
         <StacksWalletPanel />
         {!address ? (
-          <p className="text-sm text-zinc-400">
-            Connect a wallet to view your bets.
-          </p>
+          <Notice
+            variant="info"
+            title="Connect your wallet"
+            description="Connect a wallet to view your bets."
+          />
         ) : null}
         <p className="text-xs text-zinc-500">
           Current height:{" "}
@@ -262,15 +309,24 @@ export default function GuessTheHashWalletClient() {
               </p>
             ) : null}
             {betStatus === "loading" ? (
-              <p className="text-sm text-zinc-400">Loading bet...</p>
+              <div className="space-y-2">
+                <div className="h-4 w-2/3 animate-pulse rounded bg-zinc-800/60" />
+                <div className="h-4 w-1/2 animate-pulse rounded bg-zinc-800/60" />
+              </div>
             ) : null}
             {betStatus === "not_found" ? (
-              <p className="text-sm text-zinc-400">Bet not found.</p>
+              <Notice
+                variant="info"
+                title="Bet not found."
+                description="No bet exists with that ID."
+              />
             ) : null}
             {betStatus === "error" ? (
-              <p className="text-sm text-red-300">
-                {betError ?? "Unable to read bet data."}
-              </p>
+              <Notice
+                variant="error"
+                title="Unable to load bet."
+                description={betError ?? "Unable to read bet data."}
+              />
             ) : null}
             {bet ? (
               <div className="space-y-2 text-sm text-zinc-300">
@@ -281,7 +337,7 @@ export default function GuessTheHashWalletClient() {
                   </span>
                 </p>
                 <p>
-                  Status: <span className="text-zinc-100">{betStatusLabel}</span>
+                  Status: <StatusBadge variant={statusVariant} label={betStatusLabel} />
                 </p>
                 <p>
                   Bettor: <span className="text-zinc-100">{bet.bettor}</span>
@@ -404,8 +460,16 @@ export default function GuessTheHashWalletClient() {
                   : "Waiting for readiness."}
               </p>
             ) : null}
-            {resolveError ? (
-              <p className="text-xs text-red-300">{resolveError}</p>
+            {resolveNotice ? (
+              <Notice
+                variant={resolveNotice.variant}
+                title={resolveNotice.title}
+                description={resolveNotice.description}
+                actionLabel={resolveTxId ? "View transaction" : undefined}
+                actionHref={
+                  resolveTxId ? getExplorerTxUrl(resolveTxId, networkName) : undefined
+                }
+              />
             ) : null}
             {resolveTxId ? (
               <p className="text-xs text-zinc-400">
