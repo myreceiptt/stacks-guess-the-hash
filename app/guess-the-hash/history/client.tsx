@@ -6,6 +6,10 @@ import { useStacksTipHeight } from "@/app/components/stacks/useStacksTipHeight";
 import HowItWorksPanel from "@/app/components/ui/HowItWorksPanel";
 import Notice from "@/app/components/ui/Notice";
 import {
+  getStacksContractAddress,
+  getStacksContractName,
+} from "@/lib/stacks-config";
+import {
   clearBetReceiptCache,
   fetchBetReceiptsForAddress,
   type BetReceipt,
@@ -14,6 +18,8 @@ import ReceiptCard from "./ReceiptCard";
 
 export default function GuessTheHashHistoryClient() {
   const { address, networkName } = useStacksWallet();
+  const contractAddress = getStacksContractAddress();
+  const contractName = getStacksContractName();
   const { height: currentHeight, error: heightError } = useStacksTipHeight();
   const [status, setStatus] = useState<"idle" | "loading" | "error">("idle");
   const [error, setError] = useState<string | null>(null);
@@ -66,6 +72,13 @@ export default function GuessTheHashHistoryClient() {
 
       <StacksWalletPanel />
       <HowItWorksPanel />
+      {!contractAddress || !contractName ? (
+        <Notice
+          variant="error"
+          title="Missing contract config."
+          description="Set NEXT_PUBLIC_CONTRACT_ADDRESS and NEXT_PUBLIC_CONTRACT_NAME in .env.local and restart dev server."
+        />
+      ) : null}
 
       {address ? (
         <section className="space-y-4">
