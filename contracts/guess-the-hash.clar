@@ -269,16 +269,17 @@
         (err ERR_TOO_EARLY)
       )
 
-      (let (
-          (outcome (try! (get-outcome-digit (get target-height bet))))
-          (won (not (is-eq (bit-and (get choice-bitmap bet) (digit->bit outcome)) u0)))
-          (payout (if won
-            (* u2 (get stake-per-char-ustx bet))
-            u0
-          ))
-          (tip-wanted (var-get resolver-tip-ustx))
-          (contract (contract-principal))
-        )
+        (let (
+            (outcome (try! (get-outcome-digit (get target-height bet))))
+            (won (not (is-eq (bit-and (get choice-bitmap bet) (digit->bit outcome)) u0)))
+            (payout (if won
+              (* u2 (get stake-per-char-ustx bet))
+              u0
+            ))
+            (tip-wanted (var-get resolver-tip-ustx))
+            (resolver tx-sender)
+            (contract (contract-principal))
+          )
         (begin
           ;; payout first (must succeed if won)
           (if won
@@ -303,7 +304,7 @@
           ;; tip is best-effort; skip if insufficient
           (let ((tip-paid (if (and (> tip-wanted u0) (>= (stx-get-balance contract) tip-wanted))
               (match (as-contract? ((with-stx tip-wanted))
-                (match (stx-transfer? tip-wanted tx-sender contract-caller)
+                (match (stx-transfer? tip-wanted tx-sender resolver)
                   ok-val tip-wanted
                   err-code u0
                 ))
