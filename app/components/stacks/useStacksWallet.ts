@@ -1,87 +1,102 @@
 "use client";
-import { useCallback, useEffect, useState } from "react";
-import type { UserData } from "@stacks/auth";
-import {
-  getStacksAddressFromUserData,
-  getStacksNetworkName,
-} from "@/lib/stacks-config";
-import { getStacksNetwork } from "@/lib/stacks-network";
-import { stacksUserSession } from "@/lib/stacks-session";
-import { getShowConnect } from "@/lib/stacks-connect";
-import {
-  getHumanReadableConnectError,
-  getKnownErrorByKey,
-} from "@/lib/stacks-errors";
+import { useCallback, useState } from "react";
+import { getStacksNetworkName } from "@/lib/stacks-config";
+import { getHumanReadableConnectError } from "@/lib/stacks-errors";
 
 export type StacksWalletState = {
   status: "disconnected" | "connecting" | "connected";
   address: string | null;
-  userData: UserData | null;
   error: string | null;
   errorDetail: string | null;
   networkName: "testnet" | "mainnet";
 };
 
+type WalletProvider = {
+  request?: (method: string, params?: unknown) => Promise<unknown>;
+};
+
+function getLeatherProvider(): WalletProvider | null {
+  if (typeof window === "undefined") {
+    return null;
+  }
+  const w = window as unknown as {
+    StacksProvider?: WalletProvider;
+    btc?: WalletProvider;
+  };
+  return w.StacksProvider ?? w.btc ?? null;
+}
+
+function extractAddress(
+  response: unknown,
+  networkName: "testnet" | "mainnet",
+): string | null {
+  if (!response) {
+    return null;
+  }
+  if (Array.isArray(response)) {
+    const first = response.find((value) => typeof value === "string");
+    return typeof first === "string" ? first : null;
+  }
+  if (typeof response === "string") {
+    return response;
+  }
+  const record = response as Record<string, unknown>;
+  const addresses = record.addresses ?? record.result;
+  if (Array.isArray(addresses)) {
+    const first = addresses[0] as any;
+    if (typeof first === "string") {
+      return first;
+    }
+    if (first?.address && typeof first.address === "string") {
+      return first.address;
+    }
+  }
+  const networkAddresses = record[networkName];
+  if (typeof networkAddresses === "string") {
+    return networkAddresses;
+  }
+  if (record.address && typeof record.address === "string") {
+    return record.address;
+  }
+  return null;
+}
+
+async function requestWalletAddress(
+  provider: WalletProvider,
+  networkName: "testnet" | "mainnet",
+): Promise<string> {
+  if (!provider.request) {
+    throw new Error("Wallet provider is unavailable.");
+  }
+  const methods = [
+    "stx_requestAccounts",
+    "stx_getAccounts",
+    "getAccounts",
+    "requestAccounts",
+  ];
+  for (const method of methods) {
+    try {
+      const result = await provider.request(method);
+      const address = extractAddress(result, networkName);
+      if (address) {
+        return address;
+      }
+    } catch {
+      // try next method
+    }
+  }
+  throw new Error("Unable to request wallet address.");
+}
+
 export function useStacksWallet() {
   const networkName = getStacksNetworkName();
-  const getSessionState = useCallback((): StacksWalletState => {
-    if (!stacksUserSession.isUserSignedIn()) {
-      return {
-        status: "disconnected",
-        address: null,
-        userData: null,
-        error: null,
-        errorDetail: null,
-        networkName,
-      };
-    }
-    const userData = stacksUserSession.loadUserData();
-    return {
-      status: "connected",
-      address: getStacksAddressFromUserData(userData, networkName),
-      userData,
-      error: null,
-      errorDetail: null,
-      networkName,
-    };
-  }, [networkName]);
-
-  const [state, setState] = useState<StacksWalletState>(() =>
-    getSessionState(),
-  );
-
-  const refresh = useCallback(() => {
-    setState(getSessionState());
-  }, [getSessionState]);
-
-  useEffect(() => {
-    if (typeof window === "undefined") {
-      return;
-    }
-    if (stacksUserSession.isSignInPending()) {
-      setState((prev) => ({
-        ...prev,
-        status: "connecting",
-        error: null,
-        errorDetail: null,
-      }));
-      stacksUserSession
-        .handlePendingSignIn()
-        .then(() => {
-          refresh();
-        })
-        .catch((error) => {
-          const message = getHumanReadableConnectError(error);
-          setState((prev) => ({
-            ...prev,
-            status: "disconnected",
-            error: `${message.title} ${message.detail}`,
-            errorDetail:
-              error instanceof Error ? error.message : String(error),
-          }));
-        });
-    }
-  }, [refresh]);
+  const [state, setState] = useState<StacksWalletState>(() => ({
+    status: "disconnected",
+    address: null,
+    error: null,
+    errorDetail: null,
+    networkName,
+  }));
 
   const connect = useCallback(() => {
     setState((prev) => ({
@@ -90,58 +105,26 @@ export function useStacksWallet() {
       error: null,
       errorDetail: null,
     }));
-    if (typeof window === "undefined") {
+    const provider = getLeatherProvider();
+    if (!provider) {
       setState((prev) => ({
         ...prev,
         status: "disconnected",
-        error: "Wallet connect is only available in the browser.",
+        error:
+          "Leather wallet not detected. Make sure the extension is installed and unlocked.",
         errorDetail: null,
       }));
       return;
     }
-    const connectOptions = {
-      appDetails: {
-        name: "Guess The Hash",
-        icon: "/icon.svg",
-      },
-      userSession: stacksUserSession as unknown as any,
-      network: getStacksNetwork(),
-      manifestPath: "/manifest.json",
-      authOptions: {
-        appDetails: {
-          name: "Guess The Hash",
-          icon: "/icon.svg",
-        },
-        userSession: stacksUserSession as unknown as any,
-        onFinish: () => {
-          refresh();
-        },
-        onCancel: () => {
-          const message = getKnownErrorByKey("connectCancelled");
-          setState((prev) => ({
-            ...prev,
-            status: "disconnected",
-            error: `${message.title} ${message.detail}`,
-            errorDetail: null,
-          }));
-        },
-      },
-      onFinish: () => {
-        refresh();
-      },
-      onCancel: () => {
-        const message = getKnownErrorByKey("connectCancelled");
+    requestWalletAddress(provider, networkName)
+      .then((address) => {
         setState((prev) => ({
           ...prev,
-          status: "disconnected",
-          error: `${message.title} ${message.detail}`,
+          status: "connected",
+          address,
+          error: null,
           errorDetail: null,
         }));
-      },
-    };
-    getShowConnect()
-      .then((showConnectFn) => {
-        showConnectFn(connectOptions);
       })
       .catch((error) => {
         const message = getHumanReadableConnectError(error);
@@ -152,14 +135,12 @@ export function useStacksWallet() {
           errorDetail: error instanceof Error ? error.message : String(error),
         }));
       });
-  }, [refresh]);
+  }, [networkName]);
 
   const disconnect = useCallback(() => {
-    stacksUserSession.signUserOut("/");
     setState({
       status: "disconnected",
       address: null,
-      userData: null,
       error: null,
       errorDetail: null,
       networkName,
@@ -170,6 +151,5 @@ export function useStacksWallet() {
     ...state,
     connect,
     disconnect,
-    refresh,
   };
 }
