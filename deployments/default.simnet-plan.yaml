@@ -60,4 +60,12 @@ genesis:
     - signers-voting
     - costs-4
 plan:
-  batches: []
+  batches:
+    - id: 0
+      transactions:
+        - emulated-contract-publish:
+            contract-name: guess-the-hash
+            emulated-sender: ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM
+            path: contracts/guess-the-hash.clar
+            clarity-version: 4
+      epoch: "3.3"
