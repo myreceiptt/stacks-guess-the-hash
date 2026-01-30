@@ -3,6 +3,7 @@ import { useEffect, useMemo, useState } from "react";
 import type { StacksNetworkName } from "@/lib/stacks-config";
 import { buildLeaderboard, type LeaderboardEntry } from "@/lib/stacks-stats";
 import { formatUstxToStx, shortenStacksAddress } from "@/lib/stacks-utils";
+import Notice from "@/app/components/ui/Notice";
 
 type LeaderboardProps = {
   networkName: StacksNetworkName;
@@ -92,6 +93,14 @@ export default function Leaderboard({ networkName }: LeaderboardProps) {
               <span>{row.net}</span>
             </div>
           ))}
+        </div>
+      ) : status !== "loading" ? (
+        <div className="mt-4">
+          <Notice
+            variant="info"
+            title="No leaderboard data yet."
+            description="Place and resolve bets to populate the leaderboard."
+          />
         </div>
       ) : null}
     </div>
