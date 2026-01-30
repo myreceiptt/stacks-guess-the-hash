@@ -13,6 +13,7 @@ export type StacksWalletState = {
 
 type WalletProvider = {
   request?: (method: string, params?: unknown) => Promise<unknown>;
+  getAddresses?: (options?: unknown) => Promise<unknown>;
 };
 
 function getLeatherProvider(): WalletProvider | null {
@@ -21,9 +22,19 @@ function getLeatherProvider(): WalletProvider | null {
   }
   const w = window as unknown as {
     StacksProvider?: WalletProvider;
+    stacks?: { provider?: WalletProvider };
+    LeatherProvider?: WalletProvider;
+    leather?: WalletProvider;
     btc?: WalletProvider;
   };
-  return w.StacksProvider ?? w.btc ?? null;
+  return (
+    w.StacksProvider ??
+    w.stacks?.provider ??
+    w.LeatherProvider ??
+    w.leather ??
+    w.btc ??
+    null
+  );
 }
 
 function extractAddress(
@@ -65,18 +76,30 @@ async function requestWalletAddress(
   provider: WalletProvider,
   networkName: "testnet" | "mainnet",
 ): Promise<string> {
-  if (!provider.request) {
+  if (!provider.request && !provider.getAddresses) {
     throw new Error("Wallet provider is unavailable.");
+  }
+  if (provider.getAddresses) {
+    const result = await provider.getAddresses({ network: networkName });
+    const address = extractAddress(result, networkName);
+    if (address) {
+      return address;
+    }
   }
   const methods = [
     "stx_requestAccounts",
     "stx_getAccounts",
+    "stx_getAddresses",
+    "getAddresses",
     "getAccounts",
     "requestAccounts",
   ];
   for (const method of methods) {
     try {
-      const result = await provider.request(method);
+      if (!provider.request) {
+        continue;
+      }
+      const result = await provider.request(method, { network: networkName });
       const address = extractAddress(result, networkName);
       if (address) {
         return address;
