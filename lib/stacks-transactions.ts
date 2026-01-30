@@ -6,6 +6,8 @@ export type StacksTx = {
   sender_address: string;
   tx_type: string;
   tx_status: string;
+  block_height?: number;
+  block_time_iso?: string;
   contract_call?: {
     contract_id: string;
     function_name: string;
