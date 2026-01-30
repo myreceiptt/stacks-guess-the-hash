@@ -29,6 +29,12 @@ Guess The Hash is a simple on-chain betting game on Stacks:
 
 ```bash
 pnpm install
+pnpm dev
+```
+
+Optional (contracts/tests):
+
+```bash
 clarinet check
 pnpm test
 ```
@@ -64,3 +70,20 @@ pnpm test
     - `stake-per-char-ustx` as `u<number>`
 - resolve:
   - `contract-call?` to `guess-the-hash::resolve` with `u<bet-id>` after `target-height`
+
+## Key routes
+
+- `/guess-the-hash` — home + contract status
+- `/guess-the-hash/place-bet` — place a bet
+- `/guess-the-hash/history` — bet receipts + resolve
+- `/guess-the-hash/stats` — leaderboard + my stats
+
+## Smoke Test
+
+- Connect wallet (testnet)
+- Place bet with 1 digit
+- Confirm tx link works
+- Wait for ready
+- Resolve
+- Check History receipt updates
+- Check Stats shows numbers
