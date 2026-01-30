@@ -220,7 +220,7 @@ export default function ReceiptCard({
       </div>
 
       <div className="flex flex-wrap items-center gap-3">
-        {receipt.betId === null ? null : (
+        {receipt.betId === null || receipt.resolved ? null : (
           <button
             type="button"
             disabled={!canResolve || resolveStatus === "submitting"}
