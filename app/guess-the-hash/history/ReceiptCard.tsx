@@ -139,7 +139,7 @@ export default function ReceiptCard({
         functionName: "resolve",
         functionArgs: [uintCV(receipt.betId)],
         network: getStacksNetwork(),
-        onFinish: async (data) => {
+        onFinish: async (data: { txId: string }) => {
           setResolveTxId(data.txId);
           setResolveStatus("broadcasted");
           setResolveNotice({
