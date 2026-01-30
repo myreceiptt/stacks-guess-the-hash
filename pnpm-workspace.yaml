@@ -1,0 +1,6 @@
+onlyBuiltDependencies:
+  - '@reown/appkit'
+  - esbuild
+  - secp256k1
+  - sharp
+  - unrs-resolver

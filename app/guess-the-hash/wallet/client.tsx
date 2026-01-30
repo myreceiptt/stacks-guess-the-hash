@@ -20,6 +20,7 @@ import {
 } from "@/lib/stacks-readonly";
 import { getStacksNetwork } from "@/lib/stacks-network";
 import { getHumanReadableError, getKnownErrorByKey } from "@/lib/stacks-errors";
+import { getOpenContractCall } from "@/lib/stacks-connect";
 import {
   bitmapToDigits,
   getExplorerAddressUrl,
@@ -155,7 +156,7 @@ export default function GuessTheHashWalletClient() {
     setResolveTxId(null);
     setResolveStatus("submitting");
     try {
-      const { openContractCall } = await import("@stacks/connect");
+      const openContractCall = await getOpenContractCall();
       openContractCall({
         contractAddress,
         contractName,
@@ -163,7 +164,7 @@ export default function GuessTheHashWalletClient() {
         functionArgs: [uintCV(betId)],
         network: getStacksNetwork(),
         stxAddress: address,
-        onFinish: async (data) => {
+        onFinish: async (data: { txId: string }) => {
           setResolveTxId(data.txId);
           setResolveStatus("broadcasted");
           setResolveNotice({
@@ -256,6 +257,13 @@ export default function GuessTheHashWalletClient() {
           Wallet Connection
         </h2>
         <StacksWalletPanel />
+        {!contractAddress || !contractName ? (
+          <Notice
+            variant="error"
+            title="Missing contract config."
+            description="Set NEXT_PUBLIC_CONTRACT_ADDRESS and NEXT_PUBLIC_CONTRACT_NAME in .env.local and restart dev server."
+          />
+        ) : null}
         {!address ? (
           <Notice
             variant="info"

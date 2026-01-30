@@ -24,6 +24,14 @@ const MESSAGES = {
     title: "Transaction failed.",
     detail: "Transaction failed. See explorer for details.",
   },
+  connectFailed: {
+    title: "Wallet connection failed.",
+    detail: "Check pop-up blocking and Leather testnet settings.",
+  },
+  connectCancelled: {
+    title: "Connection cancelled.",
+    detail: "Cancelled in wallet.",
+  },
 };
 
 function normalizeErrorMessage(error: unknown): string {
@@ -76,4 +84,20 @@ export function getKnownErrorByKey(
   key: keyof typeof MESSAGES,
 ): HumanErrorMessage {
   return MESSAGES[key];
+}
+
+export function getHumanReadableConnectError(
+  error: unknown,
+  overrides?: Partial<HumanErrorMessage>,
+): HumanErrorMessage {
+  const message = normalizeErrorMessage(error).toLowerCase();
+  if (
+    message.includes("cancel") ||
+    message.includes("user rejected") ||
+    message.includes("denied") ||
+    message.includes("aborted")
+  ) {
+    return { ...MESSAGES.connectCancelled, ...overrides };
+  }
+  return { ...MESSAGES.connectFailed, ...overrides };
 }

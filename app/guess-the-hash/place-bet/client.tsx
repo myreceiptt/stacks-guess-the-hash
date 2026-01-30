@@ -16,6 +16,7 @@ import {
 import { fetchGuessTheHashConfig } from "@/lib/stacks-readonly";
 import { getStacksNetwork } from "@/lib/stacks-network";
 import { getHumanReadableError, getKnownErrorByKey } from "@/lib/stacks-errors";
+import { getOpenContractCall } from "@/lib/stacks-connect";
 import {
   formatUstxToStx,
   getExplorerAddressUrl,
@@ -181,7 +182,7 @@ export default function PlaceBetClient() {
     }
     setTxStatus("submitting");
     try {
-      const { openContractCall } = await import("@stacks/connect");
+      const openContractCall = await getOpenContractCall();
       openContractCall({
         contractAddress,
         contractName,
@@ -192,7 +193,7 @@ export default function PlaceBetClient() {
         ],
         network: getStacksNetwork(),
         stxAddress: address,
-        onFinish: (data) => {
+        onFinish: (data: { txId: string }) => {
           setTxId(data.txId);
           setTxStatus("idle");
           setTxNotice({
@@ -238,6 +239,13 @@ export default function PlaceBetClient() {
         <div className="rounded-lg border border-red-500/40 bg-red-500/10 px-4 py-3 text-sm text-red-200">
           Switch to Testnet.
         </div>
+      ) : null}
+      {!contractAddress || !contractName ? (
+        <Notice
+          variant="error"
+          title="Missing contract config."
+          description="Set NEXT_PUBLIC_CONTRACT_ADDRESS and NEXT_PUBLIC_CONTRACT_NAME in .env.local and restart dev server."
+        />
       ) : null}
 
       <section className="space-y-4 rounded-lg border border-zinc-800/60 bg-zinc-900/20 p-4">
