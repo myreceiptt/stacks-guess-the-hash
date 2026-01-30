@@ -154,6 +154,11 @@ export default function GuessTheHashClient() {
             href="/guess-the-hash/wallet">
             My Wallet
           </Link>
+          <Link
+            className="underline text-zinc-200 hover:text-white"
+            href="/guess-the-hash/stats">
+            Leaderboard &amp; My Stats
+          </Link>
         </div>
       </section>
     </main>
