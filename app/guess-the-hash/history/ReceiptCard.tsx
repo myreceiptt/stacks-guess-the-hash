@@ -119,6 +119,15 @@ export default function ReceiptCard({
     if (receipt.betId === null || !contractAddress || !contractName) {
       return;
     }
+    if (networkName !== "testnet") {
+      const message = getKnownErrorByKey("networkMismatch");
+      setResolveNotice({
+        variant: "error",
+        title: message.title,
+        description: message.detail,
+      });
+      return;
+    }
     setResolveNotice(null);
     setResolveStatus("submitting");
     try {
