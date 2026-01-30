@@ -8,9 +8,6 @@ importers:
 
   .:
     dependencies:
-      '@stacks/auth':
-        specifier: ^7.3.1
-        version: 7.3.1
       '@stacks/clarinet-sdk':
         specifier: ^3.9.0
         version: 3.13.1
@@ -894,23 +891,14 @@ packages:
   '@rtsao/scc@1.1.0':
     resolution: {integrity: sha512-zt6OdqaDoOnJ1ZYsCYGt9YmWzDXl4vQdKTyJev62gFhRGKdx7mcT54V9KIjg+d2wi9EXsPvAPKe7i7WjfVWB8g==}
 
-  '@scure/base@1.1.9':
-    resolution: {integrity: sha512-8YKhl8GHiNI/pU2VMaofa2Tor7PJRAjwQLBBuilkJ9L5+13yVbC7JO/wS7piioAvPSwR3JKM1IJ/u4xQzbcXKg==}
-
   '@scure/base@1.2.6':
     resolution: {integrity: sha512-g/nm5FgUa//MCj1gV09zTJTaM6KBAHqLN907YVQqf7zC49+DcO4B1so4ZX07Ef10Twr6nuqYEH9GEggFXA4Fmg==}
 
   '@scure/bip32@1.7.0':
     resolution: {integrity: sha512-E4FFX/N3f4B80AKWp5dP6ow+flD1LQZo/w8UnLGYZO674jS6YnYeepycOOksv+vLPSpgN35wgKgy+ybfTb2SMw==}
 
-  '@scure/bip39@1.1.0':
-    resolution: {integrity: sha512-pwrPOS16VeTKg98dYXQyIjJEcWfz7/1YJIwxUEPFfQPtc86Ym/1sVgQ2RLoD43AazMk2l/unK4ITySSpW2+82w==}
-
   '@scure/bip39@1.6.0':
     resolution: {integrity: sha512-+lF0BbLiJNwVlev4eKelw1WWLaiKXw7sSl8T6FvBlWkdX+94aGJ4o8XjUdlyhTCjd8c+B3KT3JfS8P0bLRNU6A==}
-
-  '@stacks/auth@7.3.1':
-    resolution: {integrity: sha512-8zjQrnthhymJruSWYuP17IRx+c0k8LrOZYH9DRyaTzjEZ+pbvsRUM9v7hH1aGr2LG94BI9249qXpCtGWorVI+g==}
 
   '@stacks/clarinet-sdk-wasm@3.13.1':
     resolution: {integrity: sha512-bNGdmhAsGhMmqbJ6DnBdZBKGQAMAyQXAEkoTjHLFjxj013XxiUMXEl1nVxdQmjqDuZFXn9bkkHTF56YF1aCQ/g==}
@@ -930,9 +918,6 @@ packages:
 
   '@stacks/connect@8.2.4':
     resolution: {integrity: sha512-tN7n+mZN3aO1eTE0C2Xt3May4I4FjSLkDi17fILzSwCclTfyNEYXlADPn/nZDpJ/x+5vnWwtjwX628d6MnEgkQ==}
-
-  '@stacks/encryption@7.3.1':
-    resolution: {integrity: sha512-hCY61gd4PVr5LUZKOuzWfPLmuPrIGEapd1LkMintToJ+F3R/x0T+iIJVnJf2Y1l0cJsc4Xxq/TWCBeEAfybScg==}
 
   '@stacks/network@6.17.0':
     resolution: {integrity: sha512-numHbfKjwco/rbkGPOEz8+FcJ2nBnS/tdJ8R422Q70h3SiA9eqk9RjSzB8p4JP8yW1SZvW+eihADHfMpBuZyfw==}
@@ -2857,10 +2842,6 @@ packages:
     resolution: {integrity: sha512-g6QUff04oZpHs0eG5p83rFLhHeV00ug/Yf9nZM6fLeUrPguBTkTQOdpAWWspMh55TZfVQDPaN3NQJfbVRAxdIw==}
     engines: {iojs: '>=1.0.0', node: '>=0.10.0'}
 
-  ripemd160-min@0.0.6:
-    resolution: {integrity: sha512-+GcJgQivhs6S9qvLogusiTcS9kQUfgR75whKuy5jIhuiOfQuJ8fjqxV6EGD5duH1Y/FawFUMtMhyeq3Fbnib8A==}
-    engines: {node: '>=8'}
-
   ripemd160@2.0.3:
     resolution: {integrity: sha512-5Di9UC0+8h1L6ZD2d7awM7E/T4uA1fJRlx6zk/NvdCCVEoAnFqvHmCuNeIKoCeIixBX/q8uM+6ycDvF8woqosA==}
     engines: {node: '>= 0.8'}
@@ -4478,8 +4459,6 @@ snapshots:
 
   '@rtsao/scc@1.1.0': {}
 
-  '@scure/base@1.1.9': {}
-
   '@scure/base@1.2.6': {}
 
   '@scure/bip32@1.7.0':
@@ -4488,27 +4467,10 @@ snapshots:
       '@noble/hashes': 1.8.0
       '@scure/base': 1.2.6
 
-  '@scure/bip39@1.1.0':
-    dependencies:
-      '@noble/hashes': 1.1.5
-      '@scure/base': 1.1.9
-
   '@scure/bip39@1.6.0':
     dependencies:
       '@noble/hashes': 1.8.0
       '@scure/base': 1.2.6
-
-  '@stacks/auth@7.3.1':
-    dependencies:
-      '@noble/secp256k1': 1.7.1
-      '@stacks/common': 7.3.1
-      '@stacks/encryption': 7.3.1
-      '@stacks/network': 7.3.1
-      '@stacks/profile': 7.3.1
-      cross-fetch: 3.2.0
-      jsontokens: 4.0.1
-    transitivePeerDependencies:
-      - encoding
 
   '@stacks/clarinet-sdk-wasm@3.13.1': {}
 
@@ -4574,17 +4536,6 @@ snapshots:
       - uploadthing
       - utf-8-validate
       - zod
-
-  '@stacks/encryption@7.3.1':
-    dependencies:
-      '@noble/hashes': 1.1.5
-      '@noble/secp256k1': 1.7.1
-      '@scure/bip39': 1.1.0
-      '@stacks/common': 7.3.1
-      base64-js: 1.5.1
-      bs58: 5.0.0
-      ripemd160-min: 0.0.6
-      varuint-bitcoin: 1.1.2
 
   '@stacks/network@6.17.0':
     dependencies:
@@ -5460,6 +5411,7 @@ snapshots:
   bs58@5.0.0:
     dependencies:
       base-x: 4.0.1
+    optional: true
 
   bs58@6.0.0:
     dependencies:
@@ -7073,8 +7025,6 @@ snapshots:
 
   reusify@1.1.0: {}
 
-  ripemd160-min@0.0.6: {}
-
   ripemd160@2.0.3:
     dependencies:
       hash-base: 3.1.2
@@ -7636,6 +7586,7 @@ snapshots:
   varuint-bitcoin@1.1.2:
     dependencies:
       safe-buffer: 5.2.1
+    optional: true
 
   viem@2.31.0(typescript@5.9.3)(zod@4.3.6):
     dependencies:
