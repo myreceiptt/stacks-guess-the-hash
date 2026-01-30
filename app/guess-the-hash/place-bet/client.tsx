@@ -193,7 +193,7 @@ export default function PlaceBetClient() {
         ],
         network: getStacksNetwork(),
         stxAddress: address,
-        onFinish: (data) => {
+        onFinish: (data: { txId: string }) => {
           setTxId(data.txId);
           setTxStatus("idle");
           setTxNotice({
