@@ -16,6 +16,7 @@ import {
 import { fetchGuessTheHashConfig } from "@/lib/stacks-readonly";
 import { getStacksNetwork } from "@/lib/stacks-network";
 import { getHumanReadableError, getKnownErrorByKey } from "@/lib/stacks-errors";
+import { getOpenContractCall } from "@/lib/stacks-connect";
 import {
   formatUstxToStx,
   getExplorerAddressUrl,
@@ -181,7 +182,7 @@ export default function PlaceBetClient() {
     }
     setTxStatus("submitting");
     try {
-      const { openContractCall } = await import("@stacks/connect");
+      const openContractCall = await getOpenContractCall();
       openContractCall({
         contractAddress,
         contractName,
