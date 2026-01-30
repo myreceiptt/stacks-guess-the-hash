@@ -96,6 +96,13 @@ export default function GuessTheHashClient() {
         </div>
 
         <div className="rounded-lg border border-zinc-800/80 bg-black/30 px-4 py-4">
+          {!contractAddress || !contractName ? (
+            <Notice
+              variant="error"
+              title="Missing contract config."
+              description="Set NEXT_PUBLIC_CONTRACT_ADDRESS and NEXT_PUBLIC_CONTRACT_NAME in .env.local and restart dev server."
+            />
+          ) : null}
           {configStatus === "loading" ? (
             <div className="space-y-2">
               <div className="h-4 w-1/2 animate-pulse rounded bg-zinc-800/60" />
