@@ -3,6 +3,7 @@ import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import StacksWalletPanel from "../components/stacks/StacksWalletPanel";
 import { useStacksWallet } from "../components/stacks/useStacksWallet";
+import Notice from "@/app/components/ui/Notice";
 import {
   getStacksContractAddress,
   getStacksContractName,
@@ -139,6 +140,13 @@ export default function GuessTheHashClient() {
           Wallet Connection
         </h2>
         <StacksWalletPanel />
+        {!address ? (
+          <Notice
+            variant="info"
+            title="Connect your wallet"
+            description="Connect to view personalized bet data."
+          />
+        ) : null}
       </section>
 
       <section className="space-y-2 rounded-lg border border-zinc-800/60 bg-zinc-900/20 p-4">
