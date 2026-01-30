@@ -156,6 +156,11 @@ export default function GuessTheHashClient() {
           </Link>
           <Link
             className="underline text-zinc-200 hover:text-white"
+            href="/guess-the-hash/history">
+            Bet History
+          </Link>
+          <Link
+            className="underline text-zinc-200 hover:text-white"
             href="/guess-the-hash/stats">
             Leaderboard &amp; My Stats
           </Link>
