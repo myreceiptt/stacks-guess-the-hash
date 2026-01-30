@@ -11,5 +11,7 @@ coverage
 costs-reports.json
 node_modules
 
+.next/
+
 .secrets/
 .env.local
